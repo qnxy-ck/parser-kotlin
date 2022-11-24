@@ -1,0 +1,62 @@
+if(x > 1) {
+    ;
+}
+true;
+false;
+null;
+"abc";
+
+1 + 2 * 3;
+1 - 2 / 3;
+(1 - 2) / 3;
+// hello
+
+/**
+* abc
+*/
+
+x.y;
+x[0] = 1;
+a.b.c['a'];
+
+let s = "hello world";
+let i = 0;
+while(i < s.length) {
+    s[i];
+    i += 1;
+}
+
+seq();
+seq(2);
+seq()();
+seq(x = 2, z = 1);
+
+let m = "abc";
+console.log("abc", m["a"]);
+
+class Point {
+    
+    def constructor(x, y){
+        this.x = x;
+        this.y = y;
+    }
+    
+    def calc() {
+        return this.x + this.y;
+    }
+    
+}
+
+class Point3D extends Point {
+    def constructor(x, y, z) {
+        super(x, y);
+        this.z = z;
+    }
+    def calc() {
+        return super() + this.z;
+    }
+    
+    let p = new Point3D(10, 20, 30);
+    p.calc();
+    
+}
