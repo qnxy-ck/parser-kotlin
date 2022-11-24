@@ -20,15 +20,15 @@ internal class Tokenizer {
 
     private var cursor = 0
 
-    private val matchMap: Map<Regex, ((String) -> Token)?> = mapOf(
+    private val matchMap: Map<Regex, (String) -> Token?> = mapOf(
         // ------------------------------------------------------------------------------
         // 空格
-        "\\s+".toRegex() to null,
+        "\\s+".toRegex() to { null },
 
         // ------------------------------------------------------------------------------
         // 注释
-        """//.*""".toRegex() to null,
-        """/\*[\s\S]*?\*/""".toRegex() to null,
+        """//.*""".toRegex() to { null },
+        """/\*[\s\S]*?\*/""".toRegex() to { null },
 
         // ------------------------------------------------------------------------------
         // 符号
@@ -102,19 +102,17 @@ internal class Tokenizer {
 
     )
 
-    fun nextToken(): Token? {
+    tailrec fun nextToken(): Token? {
         if (cursor >= this.text.length) return null
 
-        val sliceText = this.text.substring(this.cursor)
+        for ((reg, funToken) in matchMap) {
+            val mr = reg.matchAt(text, this.cursor) ?: continue
 
-        for (reg in matchMap.keys) {
-            val mr = reg.matchAt(sliceText, 0) ?: continue
-
-            this.cursor += mr.range.last + 1
-            return matchMap[reg]?.invoke(mr.value) ?: this.nextToken()
+            this.cursor = mr.range.last + 1
+            return funToken(mr.value) ?: this.nextToken()
         }
 
-        throw RuntimeException("""Unexpected token: "${sliceText[0]}"""")
+        throw RuntimeException("""Unexpected token: "${text[this.cursor]}"""")
     }
 
 
