@@ -7,105 +7,90 @@ import com.fasterxml.jackson.annotation.JsonValue
  * @author ck
  * 2022/11/24
  */
-interface Token<T> {
-    val data: T?
-        get() = null
+interface Token
+interface DataToken<T> : Token {
+    val data: T
 }
 
 @JvmInline
-value class NumberToken(override val data: Int) : Token<Int>
+value class NumberToken(override val data: Int) : DataToken<Int>
 
 @JvmInline
-value class StringToken(override val data: String) : Token<String>
+value class StringToken(override val data: String) : DataToken<String>
 
 @JvmInline
-value class IdentifierToken(override val data: String) : Token<String>
+value class IdentifierToken(override val data: String) : DataToken<String>
 
-object SemicolonToken : Token<Nothing>
-object CurlyBracketLToken : Token<Nothing>
-object CurlyBracketRToken : Token<Nothing>
-object OpenParenthesisToken : Token<Nothing>
-object CloseParenthesisToken : Token<Nothing>
-object CommaToken : Token<Nothing>
-object LetToken : Token<Nothing>
-object IfToken : Token<Nothing>
-object ElseToken : Token<Nothing>
-object NullToken : Token<Nothing>
-object WhileToken : Token<Nothing>
-object DoToken : Token<Nothing>
-object ForToken : Token<Nothing>
-object DefToken : Token<Nothing>
-object ReturnToken : Token<Nothing>
-object DotToken : Token<Nothing>
-object OpenSquareBracketToken : Token<Nothing>
-object CloseSquareBracketToken : Token<Nothing>
-object ClassToken : Token<Nothing>
-object ExtendsToken : Token<Nothing>
-object SuperToken : Token<Nothing>
-object ThisToken : Token<Nothing>
-object NewToken : Token<Nothing>
+object SemicolonToken : Token
+object CurlyBracketLToken : Token
+object CurlyBracketRToken : Token
+object OpenParenthesisToken : Token
+object CloseParenthesisToken : Token
+object CommaToken : Token
+object LetToken : Token
+object IfToken : Token
+object ElseToken : Token
+object NullToken : Token
+object WhileToken : Token
+object DoToken : Token
+object ForToken : Token
+object DefToken : Token
+object ReturnToken : Token
+object DotToken : Token
+object OpenSquareBracketToken : Token
+object CloseSquareBracketToken : Token
+object ClassToken : Token
+object ExtendsToken : Token
+object SuperToken : Token
+object ThisToken : Token
+object NewToken : Token
 
-
-object SimpleAssignToken : StringBinaryOperatorToken {
-    override val opt get() = "="
-}
-
-object LogicalAndToken : StringBinaryOperatorToken {
-    override val opt get() = "&&"
-}
-
-object LogicalOrToken : StringBinaryOperatorToken {
-    override val opt get() = "||"
-}
-
-object LogicalNotToken : StringBinaryOperatorToken {
-    override val opt get() = "!"
-}
-
-interface BinaryOperatorToken<T> : Token<BinaryOperatorToken<T>> {
+interface BinaryOperatorToken<T> : DataToken<T> {
     @get:JsonValue
-    val opt: T
-    override val data get() = this
-
-    companion object {
-        fun <T, S> optOf(opt: T, v: Array<S>): S where S : BinaryOperatorToken<T>, S : Enum<*> {
-            return v.firstOrNull { it.opt == opt } ?: throw RuntimeException()
-        }
-    }
+    override val data: T
 }
 
-interface StringBinaryOperatorToken : BinaryOperatorToken<String>
+infix fun <T, S> Array<T>.optOf(opt: S): T where  T : BinaryOperatorToken<S>, T : Enum<*> {
+    return this.firstOrNull { it.data == opt } ?: throw RuntimeException()
+}
 
-enum class AdditiveOperatorToken(override val opt: String) : StringBinaryOperatorToken {
+abstract class SimpleStringOperatorToken(override val data: String) : BinaryOperatorToken<String>
+
+object SimpleAssignToken : SimpleStringOperatorToken("=")
+object LogicalAndToken : SimpleStringOperatorToken("&&")
+object LogicalOrToken : SimpleStringOperatorToken("||")
+object LogicalNotToken : SimpleStringOperatorToken("!")
+
+enum class AdditiveOperatorToken(override val data: String) : BinaryOperatorToken<String> {
     ADD("+"),
     SUB("-");
 }
 
-enum class MultiplicativeOperatorToken(override val opt: String) : StringBinaryOperatorToken {
+enum class MultiplicativeOperatorToken(override val data: String) : BinaryOperatorToken<String> {
     MUL("*"),
     DIV("/");
 }
 
-enum class ComplexAssignOperatorToken(override val opt: String) : StringBinaryOperatorToken {
+enum class ComplexAssignOperatorToken(override val data: String) : BinaryOperatorToken<String> {
     ADD_ASSIGN("+="),
     SUB_ASSIGN("-="),
     MUL_ASSIGN("*="),
     DIV_ASSIGN("/=");
 }
 
-enum class RelationalOperatorToken(override val opt: String) : StringBinaryOperatorToken {
+enum class RelationalOperatorToken(override val data: String) : BinaryOperatorToken<String> {
     GT(">"),
     GE(">="),
     LT("<"),
     LE("<=")
 }
 
-enum class EqualityOperatorToken(override val opt: String) : StringBinaryOperatorToken {
+enum class EqualityOperatorToken(override val data: String) : BinaryOperatorToken<String> {
     EQUAL("=="),
     NOTEQUAL("!=")
 }
 
-enum class BooleanToken(override val opt: Boolean) : BinaryOperatorToken<Boolean> {
+enum class BooleanToken(override val data: Boolean) : BinaryOperatorToken<Boolean> {
     TRUE(true),
     FALSE(false),
 }

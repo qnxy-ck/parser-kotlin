@@ -1,6 +1,5 @@
 package com.qnxy.token
 
-import com.qnxy.token.BinaryOperatorToken.Companion.optOf
 import java.io.File
 
 /**
@@ -21,7 +20,7 @@ internal class Tokenizer {
 
     private var cursor = 0
 
-    private val matchMap: Map<Regex, ((String) -> Token<out Any>?)?> = mapOf(
+    private val matchMap: Map<Regex, ((String) -> Token)?> = mapOf(
         // ------------------------------------------------------------------------------
         // 空格
         "\\s+".toRegex() to null,
@@ -68,26 +67,25 @@ internal class Tokenizer {
 
         // ------------------------------------------------------------------------------
         // 标识符
-        "\\w+".toRegex() to { IdentifierToken(it) },
+        "\\w+".toRegex() to ::IdentifierToken,
 
         // ------------------------------------------------------------------------------
         // 等式符号
-        "[=!]=".toRegex() to { optOf(it, EqualityOperatorToken.values()) },
-
+        "[=!]=".toRegex() to EqualityOperatorToken.values()::optOf,
 
         // ------------------------------------------------------------------------------
         // 赋值符号
         "=".toRegex() to { SimpleAssignToken },
-        "[*/+\\-]=".toRegex() to { optOf(it, ComplexAssignOperatorToken.values()) },
+        "[*/+\\-]=".toRegex() to ComplexAssignOperatorToken.values()::optOf,
 
         // ------------------------------------------------------------------------------
         // 关系符号
-        "[<>]=?".toRegex() to { optOf(it, RelationalOperatorToken.values()) },
+        "[<>]=?".toRegex() to RelationalOperatorToken.values()::optOf,
 
         // ------------------------------------------------------------------------------
         // 数学运算符号
-        "[+-]".toRegex() to { optOf(it, AdditiveOperatorToken.values()) },
-        "[*/]".toRegex() to { optOf(it, MultiplicativeOperatorToken.values()) },
+        "[+-]".toRegex() to AdditiveOperatorToken.values()::optOf,
+        "[*/]".toRegex() to MultiplicativeOperatorToken.values()::optOf,
 
         // ------------------------------------------------------------------------------
         // 逻辑符号
@@ -104,21 +102,20 @@ internal class Tokenizer {
 
     )
 
-    fun nextToken(): Token<out Any>? {
+    fun nextToken(): Token? {
         if (cursor >= this.text.length) return null
 
-        val sliceText = sliceText()
+        val sliceText = this.text.substring(this.cursor)
+
         for (reg in matchMap.keys) {
-            reg.matchAt(sliceText, 0)?.let {
-                this.cursor += it.range.last + 1
-                return matchMap[reg]?.invoke(it.value) ?: this.nextToken()
-            } ?: continue
+            val mr = reg.matchAt(sliceText, 0) ?: continue
+
+            this.cursor += mr.range.last + 1
+            return matchMap[reg]?.invoke(mr.value) ?: this.nextToken()
         }
 
         throw RuntimeException("""Unexpected token: "${sliceText[0]}"""")
     }
-
-    private fun sliceText() = this.text.substring(this.cursor)
 
 
 }

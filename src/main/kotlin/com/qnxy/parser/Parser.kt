@@ -11,7 +11,7 @@ import java.io.File
 class Parser {
 
     private val tokenizer: Tokenizer
-    private var lookahead: Token<*>?
+    private var lookahead: Token?
 
     constructor(file: File) {
         this.tokenizer = Tokenizer(file)
@@ -397,7 +397,7 @@ class Parser {
      *  | COMPLEX_ASSIGN
      *  ;
      */
-    private fun assignmentOperator(): StringBinaryOperatorToken {
+    private fun assignmentOperator(): BinaryOperatorToken<String> {
         return this.consumeToken()
     }
 
@@ -455,7 +455,7 @@ class Parser {
     /**
      * Generic binary or logical expression
      */
-    private inline fun <reified T : StringBinaryOperatorToken> genericOperatorExpression(isBinary: Boolean = true, builderBlock: () -> Ast): Ast {
+    private inline fun <reified T : BinaryOperatorToken<String>> genericOperatorExpression(isBinary: Boolean = true, builderBlock: () -> Ast): Ast {
         var left = builderBlock()
 
         while (this.lookahead is T) {
@@ -722,11 +722,11 @@ class Parser {
     }
 
     @Suppress("UnusedReceiverParameter")
-    private inline fun <reified T : Token<*>> T.test(): Boolean {
+    private inline fun <reified T : Token> T.test(): Boolean {
         return this@Parser.lookahead is T
     }
 
-    private inline fun <reified T : Token<*>> consumeToken(): T {
+    private inline fun <reified T : Token> consumeToken(): T {
         val token = this.lookahead ?: throw RuntimeException("Unexpected end of input, expected: ${T::class.java.simpleName}")
         if (token !is T) throw RuntimeException("Unexpected token: ${token::class.java.simpleName}, expected: ${T::class.java.simpleName}")
 

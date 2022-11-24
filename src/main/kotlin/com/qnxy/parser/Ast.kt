@@ -1,8 +1,8 @@
 package com.qnxy.parser
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder
+import com.qnxy.token.BinaryOperatorToken
 import com.qnxy.token.BooleanToken
-import com.qnxy.token.StringBinaryOperatorToken
 
 
 /**
@@ -38,7 +38,7 @@ object EmptyStatement : Ast
 
 @JvmInline
 value class Identifier(val name: String) : Ast
-data class AssignmentExpression(val operator: StringBinaryOperatorToken, val left: Ast, val right: Ast) : Ast
+data class AssignmentExpression<T>(val operator: BinaryOperatorToken<T>, val left: Ast, val right: Ast) : Ast
 
 @JvmInline
 value class VariableStatement(val declarations: List<VariableDeclaration>) : Ast
@@ -48,9 +48,9 @@ data class WhileStatement(val test: Ast, val body: Ast) : Ast
 data class DoWhileStatement(val test: Ast, val body: Ast) : Ast
 data class ForStatement(val init: Ast? = null, val test: Ast? = null, val update: Ast? = null, val body: Ast) : Ast
 
-data class BinaryExpression(val operator: StringBinaryOperatorToken, val left: Ast, val right: Ast) : Ast
-data class LogicalExpression(val operator: StringBinaryOperatorToken, val left: Ast, val right: Ast) : Ast
-data class UnaryExpression(val operator: StringBinaryOperatorToken, val argument: Ast) : Ast
+data class BinaryExpression<T>(val operator: BinaryOperatorToken<T>, val left: Ast, val right: Ast) : Ast
+data class LogicalExpression<T>(val operator: BinaryOperatorToken<T>, val left: Ast, val right: Ast) : Ast
+data class UnaryExpression<T>(val operator: BinaryOperatorToken<T>, val argument: Ast) : Ast
 
 data class FunctionDeclaration(val name: Ast, val params: List<Ast>, val body: Ast) : Ast
 data class ReturnStatement(val argument: Ast?) : Ast
